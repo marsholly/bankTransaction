@@ -11,7 +11,14 @@ router.route('/')
   })
   .post((req, res) => {
     BankTransaction.create(req.body, (err, newTransaction) => {
-      res.status(err ? 400 : 200).send(err || newTransaction);
+    //   res.status(err ? 400 : 200).send(err || newTransaction);
+    // });
+      if(err) {
+        return res.status(400).send(err);
+      }
+      BankTransaction.find({}, (err, transactions) => {
+        res.status(err ? 400 : 200).send(err || transactions);
+      });
     });
   });
 
@@ -23,8 +30,13 @@ router.route('/:id')
   })
   .delete((req, res) => {
     BankTransaction.findByIdAndRemove(req.params.id, err => {
-      res.status(err ? 400 : 200).send(err);
-    })
+      if(err) {
+        return res.status(400).send(err);
+      }
+      BankTransaction.find({}, (err, transactions) => {
+        res.status(err ? 400 : 200).send(err || transactions);
+      });
+    });
   })
   .put((req, res) => {
     BankTransaction.findByIdAndUpdate(req.params.id, {$set: req.body}, {new: true}, (err, transaction) => {

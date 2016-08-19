@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import moment from 'moment';
 
 export default class TransactionTable extends Component {
   constructor() {
@@ -54,7 +55,6 @@ export default class TransactionTable extends Component {
     this.closeModal();
   }
 
-
   cancelEdit() {
     this.setState({editingId: null});
     this.closeModal();
@@ -72,12 +72,20 @@ export default class TransactionTable extends Component {
     }
 
     let rows = transactions.map(transaction => {
+      let debit = 0;
+      let credit = 0;
+      if(transaction.style === 'debit'){
+        debit = +transaction.money;
+      }else{
+        credit = +transaction.money;
+      }
+
       return (
         <tr key={transaction._id}>
-          <td>{transaction.transactionDate}</td>
+          <td>{moment(transaction.transactionDate).format('lll')}</td>
           <td>{transaction.description}</td>
-          <td>-{transaction.debit}</td>
-          <td>+{transaction.credit}</td>
+          <td>-{debit}</td>
+          <td>+{credit}</td>
           <td>
             <button
               type="button"

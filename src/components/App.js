@@ -10,13 +10,13 @@ export default class App extends Component {
     this.addTransaction = this.addTransaction.bind(this);
     this.updateTransaction = this.updateTransaction.bind(this);
     this.deleteTransaction = this.deleteTransaction.bind(this);
+    this.getBalance = this.getBalance.bind(this);
 
     this.state = {
       description: '',
       text: 0,
       style: '',
       transactions: []
-      // balance: 0
     }
   }
 
@@ -50,8 +50,8 @@ export default class App extends Component {
       })
     })
     .then(res => res.json())
-    .then(newTransaction => {
-      console.log('newTransaction:',newTransaction);
+    .then(transactions => {
+      this.setState({transactions});
     })
     .catch(err => {
       console.log(err);
@@ -80,6 +80,9 @@ export default class App extends Component {
       method: 'DELETE'
     })
     .then(res => res.json())
+    .then(transactions => {
+      this.setState({transactions});
+    })
     .catch(err => {
       console.log('err:', err);
     })
@@ -89,17 +92,6 @@ export default class App extends Component {
     fetch('/api/bankTransactions')
       .then(res => res.json())
       .then(transactions => {
-        transactions.forEach(transaction =>{
-          if(transaction.style === 'debit'){
-            transaction.debit = +transaction.money;
-            transaction.credit = 0;
-          }else{
-            transaction.credit = +transaction.money;
-            transaction.debit = 0;
-          }
-        })
-        // balance = debitBalance - creditBalance;
-        // transaction.balance = balance;
         this.setState({transactions});
       })
       .catch(err => {
@@ -107,8 +99,21 @@ export default class App extends Component {
       })
   }
 
+  getBalance(){
+    let transactionsArr = this.state.transactions;
+    let balance = 0;
+    transactionsArr.forEach(transaction => {
+      if(transaction.style === 'debit'){
+        balance -= +transaction.money;
+      }else{
+        balance += +transaction.money;
+      }
+    })
+    return balance;
+  }
 
   render(){
+    const balance = this.getBalance();
     return(
       <div className='container'>
         <div className = 'row text-center' >
@@ -126,11 +131,11 @@ export default class App extends Component {
             </form>
           </div>
           <div className= 'col-md-6'>
-          Total
+            <h3>Balance is ${balance}.</h3>
           </div>
         </div>
         <div className= 'container'>
-          <TransactionTable transactions={this.state.transactions} updateTransaction={this.updateTransaction} deleteTransaction={this.deleteTransaction}/>
+          <TransactionTable transactions={this.state.transactions} updateTransaction={this.updateTransaction} deleteTransaction={this.deleteTransaction} getBalance={this.getBalance}/>
         </div>
       </div>
     )
